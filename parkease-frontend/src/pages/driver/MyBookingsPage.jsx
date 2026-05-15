@@ -42,6 +42,7 @@ const MyBookingsPage = () => {
   const [errors, setErrors] = useState({});
   const [extendTarget, setExtendTarget] = useState(null);
   const [extendLot, setExtendLot] = useState(null);
+  const [loadingLot, setLoadingLot] = useState(false);
   const [newEndTime, setNewEndTime] = useState('');
 
   const [form, setForm] = useState({
@@ -281,12 +282,15 @@ const MyBookingsPage = () => {
               onExtend={async () => {
                 setExtendTarget(booking);
                 setNewEndTime(toDatetimeLocal(new Date(booking.endTime)));
+                setLoadingLot(true);
                 try {
                   const res = await parkingLotApi.getLotById(booking.lotId);
                   console.log("Fetched extend lot info:", res.data);
                   setExtendLot(res.data);
                 } catch (e) {
                   console.error("Failed to fetch lot info", e);
+                } finally {
+                  setLoadingLot(false);
                 }
               }}
             />
@@ -528,24 +532,34 @@ const MyBookingsPage = () => {
             required
           />
 
-          {/* Operating Hours Warning */}
-          {extendLot && newEndTime && (
+          {/* Operating Hours Status/Warning */}
+          {loadingLot && (
+            <p className="text-[10px] text-slate-400 animate-pulse">Checking lot operating hours...</p>
+          )}
+
+          {!loadingLot && extendLot && newEndTime && (
             (() => {
               const lotOpen = extendLot.openTime?.substring(0, 5);
               const lotClose = extendLot.closeTime?.substring(0, 5);
               const requestedEnd = newEndTime.split('T')[1]?.substring(0, 5);
               
-              if (lotOpen && lotClose && requestedEnd) {
-                if (requestedEnd < lotOpen || requestedEnd > lotClose) {
-                  return (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              if (!lotOpen || !lotClose) {
+                return (
+                  <p className="text-[10px] text-slate-400 italic">
+                    Note: Operating hours not defined for this lot.
+                  </p>
+                );
+              }
+
+              if (requestedEnd < lotOpen || requestedEnd > lotClose) {
+                return (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
                        <p className="text-xs text-amber-700 font-medium flex items-center gap-1.5">
                           <Info className="w-3.5 h-3.5" />
                           Warning: The lot is only open from {lotOpen} to {lotClose}. Your selection is outside operating hours.
                        </p>
-                    </div>
-                  );
-                }
+                  </div>
+                );
               }
               return null;
             })()
