@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import {
   CalendarDays, Plus, MapPin, Clock,
   LogIn, LogOut, XCircle, Timer,
-  ChevronRight,
+  ChevronRight, Info,
 } from 'lucide-react';
 import bookingApi from '../../api/bookingApi';
 import vehicleApi from '../../api/vehicleApi';
@@ -41,6 +41,7 @@ const MyBookingsPage = () => {
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
   const [extendTarget, setExtendTarget] = useState(null);
+  const [extendLot, setExtendLot] = useState(null);
   const [newEndTime, setNewEndTime] = useState('');
 
   const [form, setForm] = useState({
@@ -277,9 +278,16 @@ const MyBookingsPage = () => {
                 `/driver/checkout/${booking.id}`
               )}
               onCancel={() => setCancelTarget(booking)}
-              onExtend={() => {
+              onExtend={async () => {
                 setExtendTarget(booking);
                 setNewEndTime(toDatetimeLocal(new Date(booking.endTime)));
+                try {
+                  const res = await parkingLotApi.getLotById(booking.lotId);
+                  console.log("Fetched extend lot info:", res.data);
+                  setExtendLot(res.data);
+                } catch (e) {
+                  console.error("Failed to fetch lot info", e);
+                }
               }}
             />
           ))}
@@ -469,19 +477,37 @@ const MyBookingsPage = () => {
       {/* ── Extend Booking Modal ────────────────────────────────── */}
       <Modal
         isOpen={!!extendTarget}
-        onClose={() => setExtendTarget(null)}
+        onClose={() => {
+          setExtendTarget(null);
+          setExtendLot(null);
+        }}
         title="Extend Booking"
         size="sm"
         footer={
           <>
             <Button
               variant="secondary"
-              onClick={() => setExtendTarget(null)}
+              onClick={() => {
+                setExtendTarget(null);
+                setExtendLot(null);
+              }}
               disabled={saving}
             >
               Cancel
             </Button>
-            <Button onClick={handleExtend} loading={saving}>
+            <Button 
+              onClick={handleExtend} 
+              loading={saving}
+              disabled={(() => {
+                if (!extendLot || !newEndTime) return false;
+                const lotOpen = extendLot.openTime?.substring(0, 5);
+                const lotClose = extendLot.closeTime?.substring(0, 5);
+                const requestedEnd = newEndTime.split('T')[1]?.substring(0, 5);
+                
+                // Block if before opening OR after closing
+                return (lotOpen && requestedEnd < lotOpen) || (lotClose && requestedEnd > lotClose);
+              })()}
+            >
               Confirm Extension
             </Button>
           </>
@@ -501,6 +527,29 @@ const MyBookingsPage = () => {
             onChange={(e) => setNewEndTime(e.target.value)}
             required
           />
+
+          {/* Operating Hours Warning */}
+          {extendLot && newEndTime && (
+            (() => {
+              const lotOpen = extendLot.openTime?.substring(0, 5);
+              const lotClose = extendLot.closeTime?.substring(0, 5);
+              const requestedEnd = newEndTime.split('T')[1]?.substring(0, 5);
+              
+              if (lotOpen && lotClose && requestedEnd) {
+                if (requestedEnd < lotOpen || requestedEnd > lotClose) {
+                  return (
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                       <p className="text-xs text-amber-700 font-medium flex items-center gap-1.5">
+                          <Info className="w-3.5 h-3.5" />
+                          Warning: The lot is only open from {lotOpen} to {lotClose}. Your selection is outside operating hours.
+                       </p>
+                    </div>
+                  );
+                }
+              }
+              return null;
+            })()
+          )}
 
           {/* Additional Fare Preview */}
           {extendTarget && newEndTime && (
