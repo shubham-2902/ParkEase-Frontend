@@ -40,14 +40,16 @@ const MyBookingsPage = () => {
   const [cancelling, setCancelling] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
+  const [extendTarget, setExtendTarget] = useState(null);
+  const [newEndTime, setNewEndTime] = useState('');
 
   const [form, setForm] = useState({
     vehicleId: '',
     lotId: preSelected?.lot?.id || '',
     spotId: preSelected?.selectedSpot?.id || '',
-    bookingType: 'PRE_BOOKING',
-    startTime: '',
-    endTime: '',
+    bookingType: preSelected?.timeWindow?.bookingType || 'PRE_BOOKING',
+    startTime: preSelected?.timeWindow?.startTime || '',
+    endTime: preSelected?.timeWindow?.endTime || '',
     notes: '',
   });
 
@@ -119,7 +121,7 @@ const MyBookingsPage = () => {
       if (preSelected?.lot?.openTime && preSelected?.lot?.closeTime) {
         const lotOpen = preSelected.lot.openTime.substring(0, 5); // HH:mm
         const lotClose = preSelected.lot.closeTime.substring(0, 5);
-        
+
         const bookingStart = form.startTime.split('T')[1].substring(0, 5);
         const bookingEnd = form.endTime.split('T')[1].substring(0, 5);
 
@@ -176,6 +178,23 @@ const MyBookingsPage = () => {
       loadData();
     } catch (err) {
       setAlert({ type: 'error', message: getErrorMessage(err) });
+    }
+  };
+
+  // ── Extend ────────────────────────────────────────────────────
+  const handleExtend = async () => {
+    if (!extendTarget || !newEndTime) return;
+    setSaving(true);
+    try {
+      await bookingApi.extendBooking(extendTarget.id, newEndTime + ':00');
+      setAlert({ type: 'success', message: 'Booking extended successfully!' });
+      setExtendTarget(null);
+      setNewEndTime('');
+      loadData();
+    } catch (err) {
+      setAlert({ type: 'error', message: getErrorMessage(err) });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -258,6 +277,10 @@ const MyBookingsPage = () => {
                 `/driver/checkout/${booking.id}`
               )}
               onCancel={() => setCancelTarget(booking)}
+              onExtend={() => {
+                setExtendTarget(booking);
+                setNewEndTime(toDatetimeLocal(new Date(booking.endTime)));
+              }}
             />
           ))}
         </div>
@@ -300,6 +323,28 @@ const MyBookingsPage = () => {
             </div>
           )}
 
+          {/* Booking Summary (Instead of inputs if pre-selected) */}
+          {preSelected?.timeWindow && (
+            <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+               <div>
+                  <p className="text-slate-500 uppercase font-bold text-[9px]">Type</p>
+                  <p className="text-slate-900 font-medium">
+                    {form.bookingType === 'WALK_IN' ? 'Walk-In' : 'Pre-Booking'}
+                  </p>
+               </div>
+               <div>
+                  <p className="text-slate-500 uppercase font-bold text-[9px]">Duration</p>
+                  <p className="text-slate-900 font-medium">
+                    {formatDateTime(form.startTime)} - {' '}
+                    {new Date(form.startTime).toDateString() === new Date(form.endTime).toDateString()
+                      ? formatDateTime(form.endTime).split(',')[1] // Just time if same day
+                      : formatDateTime(form.endTime)               // Full date if different day
+                    }
+                  </p>
+               </div>
+            </div>
+          )}
+
           {/* Vehicle */}
           <Select
             label="Select Vehicle"
@@ -318,86 +363,84 @@ const MyBookingsPage = () => {
             ))}
           </Select>
 
-          {vehicles.length === 0 && (
-            <Alert
-              variant="warning"
-              message="You have no registered vehicles. Please add one first."
-            />
+          {/* Hide redundant fields if pre-selected */}
+          {!preSelected?.timeWindow && (
+            <>
+              {/* Lot ID (editable if not pre-selected) */}
+              {!preSelected?.lot && (
+                <Input
+                  label="Lot ID"
+                  type="number"
+                  placeholder="Enter lot ID"
+                  value={form.lotId}
+                  onChange={(e) => setForm(p => ({
+                    ...p, lotId: e.target.value
+                  }))}
+                  error={errors.lotId}
+                  required
+                />
+              )}
+
+              {/* Spot ID */}
+              {!preSelected?.selectedSpot && (
+                <Input
+                  label="Spot ID"
+                  type="number"
+                  placeholder="Enter spot ID"
+                  value={form.spotId}
+                  onChange={(e) => setForm(p => ({
+                    ...p, spotId: e.target.value
+                  }))}
+                  error={errors.spotId}
+                  required
+                />
+              )}
+
+              {/* Booking type */}
+              <Select
+                label="Booking Type"
+                value={form.bookingType}
+                onChange={(e) => setForm(p => ({
+                  ...p, bookingType: e.target.value
+                }))}
+              >
+                <option value="PRE_BOOKING">
+                  Pre-Booking (Advance reservation)
+                </option>
+                <option value="WALK_IN">
+                  Walk-In (Immediate)
+                </option>
+              </Select>
+
+              {/* Time window */}
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Start Time"
+                  type="datetime-local"
+                  value={form.startTime}
+                  min={new Date().toISOString().slice(0, 16)}
+                  onChange={(e) => setForm(p => ({
+                    ...p, startTime: e.target.value
+                  }))}
+                  error={errors.startTime}
+                  disabled={form.bookingType === 'WALK_IN'}
+                  hint={form.bookingType === 'WALK_IN' ? 'Starts immediately' : undefined}
+                  required
+                />
+                <Input
+                  label="End Time"
+                  type="datetime-local"
+                  value={form.endTime}
+                  min={form.startTime || new Date().toISOString().slice(0, 16)}
+                  onChange={(e) => setForm(p => ({
+                    ...p, endTime: e.target.value
+                  }))}
+                  error={errors.endTime}
+                  required
+                />
+              </div>
+            </>
           )}
-
-          {/* Lot ID (editable if not pre-selected) */}
-          {!preSelected?.lot && (
-            <Input
-              label="Lot ID"
-              type="number"
-              placeholder="Enter lot ID"
-              value={form.lotId}
-              onChange={(e) => setForm(p => ({
-                ...p, lotId: e.target.value
-              }))}
-              error={errors.lotId}
-              required
-            />
-          )}
-
-          {/* Spot ID */}
-          {!preSelected?.selectedSpot && (
-            <Input
-              label="Spot ID"
-              type="number"
-              placeholder="Enter spot ID"
-              value={form.spotId}
-              onChange={(e) => setForm(p => ({
-                ...p, spotId: e.target.value
-              }))}
-              error={errors.spotId}
-              required
-            />
-          )}
-
-          {/* Booking type */}
-          <Select
-            label="Booking Type"
-            value={form.bookingType}
-            onChange={(e) => setForm(p => ({
-              ...p, bookingType: e.target.value
-            }))}
-          >
-            <option value="PRE_BOOKING">
-              Pre-Booking (Advance reservation)
-            </option>
-            <option value="WALK_IN">
-              Walk-In (Immediate)
-            </option>
-          </Select>
-
-          {/* Time window */}
-          <div className="grid grid-cols-2 gap-3">
-            <Input
-              label="Start Time"
-              type="datetime-local"
-              value={form.startTime}
-              min={new Date().toISOString().slice(0, 16)}
-              onChange={(e) => setForm(p => ({
-                ...p, startTime: e.target.value
-              }))}
-              error={errors.startTime}
-              disabled={form.bookingType === 'WALK_IN'}
-              hint={form.bookingType === 'WALK_IN' ? 'Starts immediately' : undefined}
-              required
-            />
-            <Input
-              label="End Time"
-              type="datetime-local"
-              value={form.endTime}
-              min={form.startTime || new Date().toISOString().slice(0, 16)}
-              onChange={(e) => setForm(p => ({
-                ...p, endTime: e.target.value
-              }))}
-              error={errors.endTime}
-              required
-            />
-          </div>
 
           {/* Fare estimate */}
           {estimatedFarePreview && (
@@ -423,6 +466,65 @@ const MyBookingsPage = () => {
         </div>
       </Modal>
 
+      {/* ── Extend Booking Modal ────────────────────────────────── */}
+      <Modal
+        isOpen={!!extendTarget}
+        onClose={() => setExtendTarget(null)}
+        title="Extend Booking"
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="secondary"
+              onClick={() => setExtendTarget(null)}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleExtend} loading={saving}>
+              Confirm Extension
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-blue-50 rounded-xl border border-blue-100 text-sm">
+            <p className="font-semibold text-blue-900">
+              Current End Time: {extendTarget && formatDateTime(extendTarget.endTime)}
+            </p>
+          </div>
+          <Input
+            label="New End Time"
+            type="datetime-local"
+            value={newEndTime}
+            min={extendTarget ? toDatetimeLocal(new Date(extendTarget.endTime)) : ''}
+            onChange={(e) => setNewEndTime(e.target.value)}
+            required
+          />
+
+          {/* Additional Fare Preview */}
+          {extendTarget && newEndTime && (
+            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex justify-between">
+              <span className="text-sm text-emerald-700 font-medium">
+                Additional fare
+              </span>
+              <span className="text-sm font-bold text-emerald-800">
+                {formatCurrency(estimateFare(
+                  toDatetimeLocal(new Date(extendTarget.endTime)),
+                  newEndTime,
+                  extendTarget.pricePerHour
+                ))}
+              </span>
+            </div>
+          )}
+
+          <Alert
+            variant="info"
+            message="Extensions are subject to availability. If another user has booked this spot after you, the extension will be declined."
+          />
+        </div>
+      </Modal>
+
       {/* ── Cancel Confirm ────────────────────────────────────── */}
       <ConfirmDialog
         isOpen={!!cancelTarget}
@@ -439,7 +541,7 @@ const MyBookingsPage = () => {
 
 // ── Booking Card ───────────────────────────────────────────────
 const BookingCard = ({
-  booking, onCheckIn, onCheckOut, onCancel
+  booking, onCheckIn, onCheckOut, onCancel, onExtend
 }) => {
   const isActive = booking.status === 'ACTIVE';
   const isReserved = booking.status === 'RESERVED';
@@ -514,14 +616,24 @@ const BookingCard = ({
             </Button>
           )}
           {(isReserved || isActive) && (
-            <Button
-              size="sm"
-              variant="danger"
-              onClick={onCancel}
-              icon={<XCircle className="w-3.5 h-3.5" />}
-            >
-              Cancel
-            </Button>
+            <>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={onExtend}
+                icon={<Timer className="w-3.5 h-3.5" />}
+              >
+                Extend
+              </Button>
+              <Button
+                size="sm"
+                variant="danger"
+                onClick={onCancel}
+                icon={<XCircle className="w-3.5 h-3.5" />}
+              >
+                Cancel
+              </Button>
+            </>
           )}
         </div>
       </div>

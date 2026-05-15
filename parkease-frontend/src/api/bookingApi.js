@@ -51,6 +51,12 @@ const bookingApi = {
   // ── Admin: Get bookings by status ─────────────────────────────
   getBookingsByStatus: (status) =>
     axiosInstance.get(`${BASE}/status`, { params: { status } }),
+
+  // ── Get occupied spots in time window ─────────────────────────
+  getOccupiedSpots: (lotId, startTime, endTime) =>
+    axiosInstance.get(`${BASE}/occupied-spots`, {
+      params: { lotId, startTime, endTime }
+    }),
 };
 
 export default bookingApi;
