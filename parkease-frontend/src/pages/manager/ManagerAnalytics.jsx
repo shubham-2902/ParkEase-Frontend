@@ -343,102 +343,53 @@ const ManagerAnalytics = () => {
             )}
           </div>
 
-          {/* ── Bottom row: Peak Hours + Spot Types ──────── */}
-          <div className="grid sm:grid-cols-2 gap-4">
-
-            {/* Peak hours */}
-            <div className="card">
-              <h2 className="font-semibold text-slate-900 mb-4">
-                Peak Hours
-              </h2>
-              {peakHours.length === 0 ? (
-                <p className="text-slate-400 text-sm text-center py-6">
-                  Not enough data yet
-                </p>
-              ) : (
-                <div className="space-y-3">
-                  {peakHours.map((ph, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className="text-xs font-mono text-slate-500
-                                       w-20 flex-shrink-0">
-                        {ph.hourLabel?.split(' ')[0]}
-                      </span>
-                      <div className="flex-1 h-5 bg-slate-100
-                                      rounded-full overflow-hidden">
-                        <div
-                          className="h-full rounded-full
-                                     transition-all text-[10px]
-                                     text-white font-medium
-                                     flex items-center px-2"
-                          style={{
-                            width: `${ph.avgOccupancyRate}%`,
-                            backgroundColor:
-                              ph.avgOccupancyRate >= 80
-                                ? '#ef4444'
-                                : ph.avgOccupancyRate >= 60
-                                ? '#f59e0b'
-                                : '#3b82f6',
-                          }}
-                        >
-                          {ph.avgOccupancyRate > 20
-                            ? `${ph.avgOccupancyRate}%`
-                            : ''}
-                        </div>
+          {/* ── Peak Hours (Full Width) ──────── */}
+          <div className="card">
+            <h2 className="font-semibold text-slate-900 mb-4">
+              Peak Hours
+            </h2>
+            {peakHours.length === 0 ? (
+              <p className="text-slate-400 text-sm text-center py-6">
+                Not enough data yet
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {peakHours.map((ph, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <span className="text-xs font-mono text-slate-500
+                                     w-20 flex-shrink-0">
+                      {ph.hourLabel?.split(' ')[0]}
+                    </span>
+                    <div className="flex-1 h-5 bg-slate-100
+                                    rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full
+                                   transition-all text-[10px]
+                                   text-white font-medium
+                                   flex items-center px-2"
+                        style={{
+                          width: `${ph.avgOccupancyRate}%`,
+                          backgroundColor:
+                            ph.avgOccupancyRate >= 80
+                              ? '#ef4444'
+                              : ph.avgOccupancyRate >= 60
+                              ? '#f59e0b'
+                              : '#3b82f6',
+                        }}
+                      >
+                        {ph.avgOccupancyRate > 20
+                          ? `${ph.avgOccupancyRate}%`
+                          : ''}
                       </div>
-                      <span className="text-xs text-slate-400 w-6
-                                       flex-shrink-0 text-right">
-                        #{i + 1}
-                      </span>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Spot type utilisation pie */}
-            <div className="card">
-              <h2 className="font-semibold text-slate-900 mb-4">
-                Spot Type Utilisation
-              </h2>
-              {pieData.length === 0 ? (
-                <p className="text-slate-400 text-sm text-center py-6">
-                  No booking data yet
-                </p>
-              ) : (
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={80}
-                      paddingAngle={3}
-                      dataKey="value"
-                    >
-                      {pieData.map((_, index) => (
-                        <Cell
-                          key={index}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(v, n) => [v, n]}
-                      contentStyle={{
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                      }}
-                    />
-                    <Legend
-                      iconType="circle"
-                      iconSize={8}
-                      wrapperStyle={{ fontSize: '11px' }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              )}
-            </div>
+                    <span className="text-xs text-slate-400 w-6
+                                     flex-shrink-0 text-right">
+                      #{i + 1}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}

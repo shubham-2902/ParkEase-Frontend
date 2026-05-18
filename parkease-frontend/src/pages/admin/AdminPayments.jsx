@@ -59,14 +59,14 @@ const AdminPayments = () => {
   const columns = [
     {
       key:   'id',
-      label: 'ID',
+      label: 'Payment ID',
       render: (v) => (
         <span className="font-mono text-sm">#{v}</span>
       ),
     },
     {
       key:   'bookingId',
-      label: 'Booking',
+      label: 'Booking ID',
       render: (v) => `#${v}`,
     },
     {

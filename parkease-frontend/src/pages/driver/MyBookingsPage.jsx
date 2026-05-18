@@ -454,6 +454,30 @@ const MyBookingsPage = () => {
             </>
           )}
 
+          {/* Operating Hours Warning */}
+          {(() => {
+            const lot = preSelected?.lot;
+            if (lot && lot.openTime && lot.closeTime && form.startTime && form.endTime) {
+              const lotOpen = lot.openTime.substring(0, 5);
+              const lotClose = lot.closeTime.substring(0, 5);
+              const arrival = form.startTime.split('T')[1]?.substring(0, 5);
+              const departure = form.endTime.split('T')[1]?.substring(0, 5);
+              
+              if ((arrival && (arrival < lotOpen || arrival > lotClose)) || 
+                  (departure && (departure < lotOpen || departure > lotClose))) {
+                return (
+                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                       <p className="text-xs text-amber-700 font-medium flex items-center gap-1.5">
+                          <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                          Warning: The lot is only open from {lotOpen} to {lotClose}. Your selection is outside operating hours.
+                       </p>
+                  </div>
+                );
+              }
+            }
+            return null;
+          })()}
+
           {/* Fare estimate */}
           {estimatedFarePreview && (
             <div className="p-3 bg-emerald-50 rounded-xl border

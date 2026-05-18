@@ -70,7 +70,7 @@ const ManagerBookings = () => {
   const columns = [
     {
       key:   'id',
-      label: '#',
+      label: 'Booking ID',
       render: (v) => <span className="font-mono text-sm">#{v}</span>,
     },
     {
@@ -79,9 +79,16 @@ const ManagerBookings = () => {
       render: (v) => `User #${v}`,
     },
     {
-      key:   'spotId',
-      label: 'Spot',
-      render: (v) => `Spot #${v}`,
+      key:   'lotId',
+      label: 'Lot / Spot',
+      render: (v, row) => (
+        <div>
+          <p className="text-sm">Lot #{v}</p>
+          <p className="text-xs text-slate-400">
+            Spot #{row.spotId}
+          </p>
+        </div>
+      ),
     },
     {
       key:   'vehiclePlate',

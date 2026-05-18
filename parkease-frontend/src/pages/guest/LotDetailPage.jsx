@@ -533,6 +533,29 @@ const LotDetailPage = () => {
             </div>
           )}
 
+          {/* Operating Hours Warning */}
+          {isDurationValid() && (() => {
+            if (lot.openTime && lot.closeTime) {
+              const lotOpen = lot.openTime.substring(0, 5);
+              const lotClose = lot.closeTime.substring(0, 5);
+              const arrival = timeWindow.startTime.split('T')[1]?.substring(0, 5);
+              const departure = timeWindow.endTime.split('T')[1]?.substring(0, 5);
+              
+              if ((arrival && (arrival < lotOpen || arrival > lotClose)) || 
+                  (departure && (departure < lotOpen || departure > lotClose))) {
+                return (
+                  <div className="mb-4">
+                    <Alert
+                      variant="warning"
+                      message={`Warning: The lot is only open from ${lotOpen} to ${lotClose}. Your selected Arrival or Departure is outside operating hours. Bookings will not be permitted.`}
+                    />
+                  </div>
+                );
+              }
+            }
+            return null;
+          })()}
+
           {/* Spots count */}
           {isDurationValid() && (
             <div className="flex items-center justify-between mb-3">

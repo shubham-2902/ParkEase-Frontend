@@ -13,10 +13,10 @@ import { formatCurrency, getErrorMessage } from '../../utils/helpers';
 const HomePage = () => {
   const navigate = useNavigate();
 
-  const [searchQuery, setSearchQuery]   = useState('');
-  const [searching, setSearching]       = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searching, setSearching] = useState(false);
   const [nearbyLoading, setNearbyLoading] = useState(false);
-  const [error, setError]               = useState('');
+  const [error, setError] = useState('');
 
   // ── Search by city / keyword ──────────────────────────────────
   const handleSearch = async (e) => {
@@ -175,7 +175,7 @@ const HomePage = () => {
             <div className="flex items-center gap-2 mt-6 flex-wrap">
               <span className="text-blue-200 text-sm">Popular:</span>
               {[
-                'Mumbai', 'Delhi', 'Bangalore',
+                'Bhopal', 'Mumbai', 'Delhi', 'Bangalore',
                 'Pune', 'Hyderabad', 'Chennai',
               ].map((city) => (
                 <button
@@ -200,9 +200,9 @@ const HomePage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
-              { value: '500+',  label: 'Parking lots'     },
-              { value: '50K+',  label: 'Happy drivers'    },
-              { value: '10+',   label: 'Cities covered'   },
+              { value: '500+', label: 'Parking lots' },
+              { value: '50K+', label: 'Happy drivers' },
+              { value: '10+', label: 'Cities covered' },
               { value: '99.9%', label: 'Uptime guarantee' },
             ].map(({ value, label }) => (
               <div key={label} className="text-center">
@@ -234,39 +234,39 @@ const HomePage = () => {
           <div className="grid md:grid-cols-4 gap-8">
             {[
               {
-                step:  '01',
-                icon:  Search,
+                step: '01',
+                icon: Search,
                 title: 'Search',
-                desc:  'Search parking by city, area, or use GPS to find nearby lots.',
+                desc: 'Search parking by city, area, or use GPS to find nearby lots.',
                 color: 'blue',
               },
               {
-                step:  '02',
-                icon:  MapPin,
+                step: '02',
+                icon: MapPin,
                 title: 'Choose Spot',
-                desc:  'View real-time availability, spot types, and pricing.',
+                desc: 'View real-time availability, spot types, and pricing.',
                 color: 'emerald',
               },
               {
-                step:  '03',
-                icon:  ParkingSquare,
+                step: '03',
+                icon: ParkingSquare,
                 title: 'Reserve',
-                desc:  'Book in advance or walk in. Your spot is held instantly.',
+                desc: 'Book in advance or walk in. Your spot is held instantly.',
                 color: 'amber',
               },
               {
-                step:  '04',
-                icon:  Smartphone,
+                step: '04',
+                icon: Smartphone,
                 title: 'Park & Pay',
-                desc:  'Check in digitally, check out, and pay online via Razorpay.',
+                desc: 'Check in digitally, check out, and pay online via Razorpay.',
                 color: 'violet',
               },
             ].map(({ step, icon: Icon, title, desc, color }) => {
               const colors = {
-                blue:    'bg-blue-50 text-blue-600',
+                blue: 'bg-blue-50 text-blue-600',
                 emerald: 'bg-emerald-50 text-emerald-600',
-                amber:   'bg-amber-50 text-amber-600',
-                violet:  'bg-violet-50 text-violet-600',
+                amber: 'bg-amber-50 text-amber-600',
+                violet: 'bg-violet-50 text-violet-600',
               };
               return (
                 <div key={step} className="relative text-center">
@@ -309,47 +309,47 @@ const HomePage = () => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                icon:  Zap,
+                icon: Zap,
                 title: 'Real-time availability',
-                desc:  'See live spot counts before you go. No surprises.',
+                desc: 'See live spot counts before you go. No surprises.',
                 color: 'amber',
               },
               {
-                icon:  Shield,
+                icon: Shield,
                 title: 'Secure payments',
-                desc:  'Pay via card, UPI, or wallet — all through Razorpay.',
+                desc: 'Pay via card, UPI, or wallet — all through Razorpay.',
                 color: 'emerald',
               },
               {
-                icon:  Clock,
+                icon: Clock,
                 title: 'Flexible booking',
-                desc:  'Pre-book or walk in. Extend your stay anytime.',
+                desc: 'Pre-book or walk in. Extend your stay anytime.',
                 color: 'blue',
               },
               {
-                icon:  Navigation,
+                icon: Navigation,
                 title: 'GPS discovery',
-                desc:  'Find the nearest available parking using your location.',
+                desc: 'Find the nearest available parking using your location.',
                 color: 'violet',
               },
               {
-                icon:  Star,
+                icon: Star,
                 title: 'EV charging',
-                desc:  'Filter for EV charging spots at supported locations.',
+                desc: 'Filter for EV charging spots at supported locations.',
                 color: 'emerald',
               },
               {
-                icon:  Smartphone,
+                icon: Smartphone,
                 title: 'Digital check-in',
-                desc:  'Check in and out via the app — no tickets, no queues.',
+                desc: 'Check in and out via the app — no tickets, no queues.',
                 color: 'blue',
               },
             ].map(({ icon: Icon, title, desc, color }) => {
               const colors = {
-                blue:    { bg: 'bg-blue-50',   icon: 'text-blue-600'   },
-                emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600'},
-                amber:   { bg: 'bg-amber-50',   icon: 'text-amber-600'  },
-                violet:  { bg: 'bg-violet-50',  icon: 'text-violet-600' },
+                blue: { bg: 'bg-blue-50', icon: 'text-blue-600' },
+                emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600' },
+                amber: { bg: 'bg-amber-50', icon: 'text-amber-600' },
+                violet: { bg: 'bg-violet-50', icon: 'text-violet-600' },
               };
               const c = colors[color];
               return (

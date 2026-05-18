@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '../utils/constants';
 import axiosInstance from './axiosInstance';
 
 const BASE = '/api/v1/auth';
@@ -35,8 +36,11 @@ const authApi = {
   // ── Google OAuth2 Login ───────────────────────────────────────
   // Opens Google consent page — handled by Spring Security
   googleLogin: (role) => {
-    const baseUrl = 'http://localhost:8080/oauth2/authorization/google';
-    window.location.href = role ? `${baseUrl}?role=${role}` : baseUrl;
+    const baseUrl = `${API_BASE_URL}/oauth2/authorization/google`;
+    // Pass the current domain as a redirect target for the backend
+    const redirectParam = `?redirect_uri=${window.location.origin}/login`;
+    const roleParam = role ? `&role=${role}` : '';
+    window.location.href = `${baseUrl}${redirectParam}${roleParam}`;
   },
 
   // ── Admin: Get all users ──────────────────────────────────────

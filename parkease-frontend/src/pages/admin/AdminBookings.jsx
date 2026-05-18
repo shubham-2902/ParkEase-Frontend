@@ -70,7 +70,7 @@ const AdminBookings = () => {
   const columns = [
     {
       key:   'id',
-      label: '#',
+      label: 'Booking ID',
       render: (v) => (
         <span className="font-mono text-sm">#{v}</span>
       ),

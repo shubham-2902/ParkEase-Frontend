@@ -5,45 +5,45 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import parkingLotApi from '../../api/parkingLotApi';
-import Button        from '../../components/ui/Button';
-import Modal         from '../../components/ui/Modal';
+import Button from '../../components/ui/Button';
+import Modal from '../../components/ui/Modal';
 import Input, { Select, Textarea } from '../../components/ui/Input';
-import Alert         from '../../components/ui/Alert';
+import Alert from '../../components/ui/Alert';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { LotStatusBadge } from '../../components/ui/Badge';
-import { SectionLoader }  from '../../components/ui/Spinner';
-import EmptyState         from '../../components/ui/EmptyState';
+import { SectionLoader } from '../../components/ui/Spinner';
+import EmptyState from '../../components/ui/EmptyState';
 import { getErrorMessage } from '../../utils/helpers';
 
 const INITIAL_FORM = {
-  name:         '',
-  address:      '',
-  city:         '',
-  state:        '',
-  pincode:      '',
-  latitude:     '',
-  longitude:    '',
-  totalSpots:   '',
+  name: '',
+  address: '',
+  city: '',
+  state: '',
+  pincode: '',
+  latitude: '',
+  longitude: '',
+  totalSpots: '',
   pricePerHour: '',
-  openTime:     '08:00',
-  closeTime:    '22:00',
-  description:  '',
-  imageUrl:     '',
+  openTime: '08:00',
+  closeTime: '22:00',
+  description: '',
+  imageUrl: '',
 };
 
 const LotManagement = () => {
   const navigate = useNavigate();
 
-  const [lots,        setLots]        = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [modalOpen,   setModalOpen]   = useState(false);
-  const [editTarget,  setEditTarget]  = useState(null);
-  const [deleteTarget,setDeleteTarget]= useState(null);
-  const [form,        setForm]        = useState(INITIAL_FORM);
-  const [errors,      setErrors]      = useState({});
-  const [saving,      setSaving]      = useState(false);
-  const [deleting,    setDeleting]    = useState(false);
-  const [alert,       setAlert]       = useState(null);
+  const [lots, setLots] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [alert, setAlert] = useState(null);
 
   const loadLots = async () => {
     setLoading(true);
@@ -68,19 +68,19 @@ const LotManagement = () => {
 
   const openEdit = (lot) => {
     setForm({
-      name:         lot.name         || '',
-      address:      lot.address      || '',
-      city:         lot.city         || '',
-      state:        lot.state        || '',
-      pincode:      lot.pincode      || '',
-      latitude:     lot.latitude     || '',
-      longitude:    lot.longitude    || '',
-      totalSpots:   lot.totalSpots   || '',
+      name: lot.name || '',
+      address: lot.address || '',
+      city: lot.city || '',
+      state: lot.state || '',
+      pincode: lot.pincode || '',
+      latitude: lot.latitude || '',
+      longitude: lot.longitude || '',
+      totalSpots: lot.totalSpots || '',
       pricePerHour: lot.pricePerHour || '',
-      openTime:     lot.openTime     || '08:00',
-      closeTime:    lot.closeTime    || '22:00',
-      description:  lot.description  || '',
-      imageUrl:     lot.imageUrl     || '',
+      openTime: lot.openTime || '08:00',
+      closeTime: lot.closeTime || '22:00',
+      description: lot.description || '',
+      imageUrl: lot.imageUrl || '',
     });
     setErrors({});
     setEditTarget(lot);
@@ -103,7 +103,7 @@ const LotManagement = () => {
       e.pincode = 'Enter valid 6-digit PIN code';
 
     if (!form.latitude || isNaN(parseFloat(form.latitude)))
-      e.latitude  = 'Valid Latitude is required';
+      e.latitude = 'Valid Latitude is required';
     if (!form.longitude || isNaN(parseFloat(form.longitude)))
       e.longitude = 'Valid Longitude is required';
 
@@ -111,7 +111,7 @@ const LotManagement = () => {
       e.totalSpots = 'Enter valid total spots';
     if (!form.pricePerHour || form.pricePerHour <= 0)
       e.pricePerHour = 'Enter valid price per hour';
-    
+
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -122,18 +122,18 @@ const LotManagement = () => {
     try {
       const payload = {
         ...form,
-        totalSpots:   parseInt(form.totalSpots),
+        totalSpots: parseInt(form.totalSpots),
         pricePerHour: parseFloat(form.pricePerHour),
-        latitude:     parseFloat(form.latitude),
-        longitude:    parseFloat(form.longitude),
-        pincode:      form.pincode,
+        latitude: parseFloat(form.latitude),
+        longitude: parseFloat(form.longitude),
+        pincode: form.pincode,
         // Ensure time format is HH:mm:ss. Only add :00 if missing.
-        openTime:     form.openTime && form.openTime.split(':').length === 2 
-                        ? `${form.openTime}:00` 
-                        : form.openTime || undefined,
-        closeTime:    form.closeTime && form.closeTime.split(':').length === 2 
-                        ? `${form.closeTime}:00` 
-                        : form.closeTime || undefined,
+        openTime: form.openTime && form.openTime.split(':').length === 2
+          ? `${form.openTime}:00`
+          : form.openTime || undefined,
+        closeTime: form.closeTime && form.closeTime.split(':').length === 2
+          ? `${form.closeTime}:00`
+          : form.closeTime || undefined,
       };
 
       if (editTarget) {
@@ -193,7 +193,7 @@ const LotManagement = () => {
       ({ coords }) => {
         setForm(p => ({
           ...p,
-          latitude:  coords.latitude.toFixed(6),
+          latitude: coords.latitude.toFixed(6),
           longitude: coords.longitude.toFixed(6)
         }));
         setAlert({ type: 'success', message: 'Location detected!' });
@@ -498,18 +498,25 @@ const LotCard = ({ lot, onEdit, onDelete, onToggle, onSpots }) => (
                     gap-4">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-3 mb-1 flex-wrap">
-          <h3 className="font-semibold text-slate-900">
+          <h3 className="font-semibold text-slate-900 flex items-center gap-2">
             {lot.name}
+            {lot.status === 'APPROVED' && (
+              <span className="text-xs font-mono text-slate-400 font-normal">
+                #{lot.id}
+              </span>
+            )}
           </h3>
           <LotStatusBadge status={lot.status} />
-          <span className={`text-[10px] font-bold px-2 py-0.5
-                            rounded-full
-                            ${lot.isOpen
-                              ? 'bg-emerald-100 text-emerald-700'
-                              : 'bg-slate-100 text-slate-500'
-                            }`}>
-            {lot.isOpen ? '● OPEN' : '● CLOSED'}
-          </span>
+          {lot.status === 'APPROVED' && (
+            <span className={`text-[10px] font-bold px-2 py-0.5
+                              rounded-full
+                              ${lot.isOpen
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-slate-100 text-slate-500'
+              }`}>
+              {lot.isOpen ? '● OPEN' : '● CLOSED'}
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1 text-sm
@@ -544,30 +551,34 @@ const LotCard = ({ lot, onEdit, onDelete, onToggle, onSpots }) => (
         <Button
           variant="secondary"
           size="sm"
-          onClick={onSpots}
-          icon={<MapPin className="w-3.5 h-3.5" />}
-        >
-          Spots
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
           onClick={onEdit}
           icon={<Edit2 className="w-3.5 h-3.5" />}
         >
           Edit
         </Button>
-        <Button
-          variant={lot.isOpen ? 'warning' : 'success'}
-          size="sm"
-          onClick={onToggle}
-          icon={lot.isOpen
-            ? <ToggleRight className="w-3.5 h-3.5" />
-            : <ToggleLeft  className="w-3.5 h-3.5" />
-          }
-        >
-          {lot.isOpen ? 'Close' : 'Open'}
-        </Button>
+        {lot.status === 'APPROVED' && (
+          <>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onSpots}
+              icon={<MapPin className="w-3.5 h-3.5" />}
+            >
+              Spots
+            </Button>
+            <Button
+              variant={lot.isOpen ? 'warning' : 'success'}
+              size="sm"
+              onClick={onToggle}
+              icon={lot.isOpen
+                ? <ToggleRight className="w-3.5 h-3.5" />
+                : <ToggleLeft className="w-3.5 h-3.5" />
+              }
+            >
+              {lot.isOpen ? 'Close' : 'Open'}
+            </Button>
+          </>
+        )}
         <Button
           variant="danger"
           size="sm"

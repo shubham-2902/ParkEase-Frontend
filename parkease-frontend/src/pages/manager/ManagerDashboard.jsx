@@ -278,6 +278,11 @@ const ManagerDashboard = () => {
                     state: { lotId: lot.id }
                   })
                 }
+                onSpots={() =>
+                  navigate('/manager/spots', {
+                    state: { lotId: lot.id }
+                  })
+                }
               />
             ))}
           </div>
@@ -341,7 +346,7 @@ const ManagerDashboard = () => {
 };
 
 // ── Lot Row ────────────────────────────────────────────────────
-const LotRow = ({ lot, onAnalytics }) => {
+const LotRow = ({ lot, onAnalytics, onSpots }) => {
   const occupancy = lot.totalSpots > 0
     ? Math.round(
         (lot.totalSpots - lot.availableSpots)
@@ -381,7 +386,7 @@ const LotRow = ({ lot, onAnalytics }) => {
         variant="ghost"
         size="sm"
         icon={<Layers className="w-3.5 h-3.5" />}
-        onClick={() => navigate('/manager/spots', { state: { lotId: lot.id } })}
+        onClick={onSpots}
       >
         <span className="hidden sm:inline">Spots</span>
       </Button>

@@ -162,6 +162,14 @@ const SpotEditor = () => {
         pricePerHour: parseFloat(singleForm.pricePerHour),
       };
       if (editTarget) {
+        if (editTarget.status !== 'AVAILABLE' && editTarget.status !== 'MAINTENANCE') {
+          setAlert({ 
+            type: 'error', 
+            message: 'Cannot edit a spot that is currently booked or reserved.' 
+          });
+          setModalMode(null);
+          return;
+        }
         await spotApi.updateSpot(editTarget.id, payload);
         setAlert({ type: 'success', message: 'Spot updated!' });
       } else {
@@ -214,6 +222,16 @@ const SpotEditor = () => {
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
+    
+    if (deleteTarget.status !== 'AVAILABLE') {
+      setAlert({ 
+        type: 'error', 
+        message: 'Cannot delete a spot that is currently booked or reserved.' 
+      });
+      setDeleteTarget(null);
+      return;
+    }
+
     setDeleting(true);
     try {
       await spotApi.deleteSpot(deleteTarget.id);
@@ -275,6 +293,7 @@ const SpotEditor = () => {
         </div>
         <div className="flex gap-2">
           <Button variant="secondary" size="sm" icon={<Plus className="w-4 h-4" />}
+            disabled={!selectedLot}
             onClick={() => { 
               setSingleForm({ ...SINGLE_FORM, pricePerHour: selectedLot?.pricePerHour || '' }); 
               setErrors({}); 
@@ -285,6 +304,7 @@ const SpotEditor = () => {
             Add Spot
           </Button>
           <Button size="sm" icon={<Layers className="w-4 h-4" />}
+            disabled={!selectedLot}
             onClick={() => { 
               const remaining = selectedLot ? selectedLot.totalSpots - spots.length : 1;
               const defaultEnd = Math.max(1, remaining > 10 ? 10 : remaining);
@@ -434,6 +454,7 @@ const SpotTile = ({ spot, onEdit, onDelete, onMaintenance }) => {
   
   const isAvailable = spot.status === 'AVAILABLE';
   const isMaintenance = spot.status === 'MAINTENANCE';
+  const canEditOrDelete = isAvailable || isMaintenance;
 
   return (
     <div className={`relative p-2 rounded-lg border-2 group transition-all ${colors[spot.status] || 'bg-slate-100'}`}>
@@ -441,7 +462,7 @@ const SpotTile = ({ spot, onEdit, onDelete, onMaintenance }) => {
       <p className="text-[9px] text-slate-500 capitalize">{spot.vehicleType?.toLowerCase().replace('_', ' ')}</p>
       
       <div className="absolute inset-0 bg-white/90 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 rounded-lg">
-        {!isMaintenance && (
+        {canEditOrDelete && (
           <>
             <button onClick={onEdit} className="p-1 text-blue-600 hover:bg-blue-50 rounded" title="Edit"><Edit2 className="w-3 h-3" /></button>
             <button onClick={onDelete} className="p-1 text-red-500 hover:bg-red-50 rounded" title="Delete"><Trash2 className="w-3 h-3" /></button>
